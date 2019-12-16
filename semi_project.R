@@ -31,14 +31,16 @@ library(dygraphs)
 ############################### 파일 불러오기
 
 # 구별 인구 수 -> pop
-population_file = "C:/Users/LHJ/Desktop/안심귀가 project/구별 인구 수.xls"
+#population_file = "C:/Users/LHJ/Desktop/안심귀가 project/구별 인구 수.xls"
+population_file = "C:/Users/student/Desktop/local_reposit/semi_project/data/구별 인구 수.xls"
 raw_population <- read_excel(path = population_file)
 pop <- as.data.frame(raw_population)
 pop <- rename(pop,gu=...1)
 View(pop);str(pop)
 
 # 구별 연도별 범죄 발생 건 수 ->crime
-crime_file = "C:/Users/LHJ/Desktop/안심귀가 project/구별 연도별 범죄 발생 건수.xls"
+#crime_file = "C:/Users/LHJ/Desktop/안심귀가 project/구별 연도별 범죄 발생 건수.xls"
+crime_file = "C:/Users/student/Desktop/local_reposit/semi_project/data/구별 연도별 범죄 발생 건수.xls"
 raw_crime <- read_excel(path = crime_file)
 crime <- as.data.frame(raw_crime)
 crime <- rename(crime,
@@ -51,7 +53,8 @@ crime <- rename(crime,
 View(crime);str(crime)
 
 # 구별 경찰서 개소 수 -> police
-police_file = "C:/Users/LHJ/Desktop/안심귀가 project/서울시 구별 경찰관서 개소 수.xls"
+#police_file = "C:/Users/LHJ/Desktop/안심귀가 project/서울시 구별 경찰관서 개소 수.xls"
+police_file = "C:/Users/student/Desktop/local_reposit/semi_project/data/서울시 구별 경찰관서 개소 수.xls"
 raw_police <- read_excel(path = police_file)
 police <- as.data.frame(raw_police)
 police <- rename(police,
@@ -61,7 +64,8 @@ police <- rename(police,
 View(police);str(police)
 
 # 구별 연도별 cctv 개수 -> cctv
-cctv_file = "C:/Users/LHJ/Desktop/안심귀가 project/서울시 자치구 년도별 CCTV 설치 현황(2011년 이전_2018년).xlsx"
+#cctv_file = "C:/Users/LHJ/Desktop/안심귀가 project/서울시 자치구 년도별 CCTV 설치 현황(2011년 이전_2018년).xlsx"
+cctv_file ="C:/Users/student/Desktop/local_reposit/semi_project/data/서울시 자치구 년도별 CCTV 설치 현황(2011년 이전_2018년).xlsx"
 raw_cctv <- read_excel(path = cctv_file)
 cctv <- as.data.frame(raw_cctv)
 cctv <- rename(cctv,
