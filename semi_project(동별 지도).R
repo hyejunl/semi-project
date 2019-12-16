@@ -264,3 +264,46 @@ ggplot() + geom_polygon(data = gangdong_map,
                             y=lat,
                             group=group),
                         color="black")
+
+###################################################
+
+##. 용산구에 치안유지장치 찍어보기 
+#shp 파일에서 용산구만 뽑아내기
+yongsan_map <- small_map[(11170100 < small_map$id) & (small_map$id <= 11170136),]
+
+#일단 merge안한 지도부터 
+ggplot() + geom_polygon(data = yongsan_map,
+                        aes(x=long,
+                            y=lat,
+                            group=group),
+                        color="gold")
+
+
+#여성 안전지킴이집 좌표 
+read.csv(file = "C:/Users/student/Desktop/local_reposit/semi_project/data/서울특별시_용산구_여성안심지킴이집_20190731.csv") -> female_safety
+arrange(female_safety,관할경찰서명)-> female_safety
+View(female_safety)
+table(female_safety$관할경찰서명)
+
+female_safety_1 <- female_safety %>%
+  select("위도","경도","소재지지번주소","관할경찰서명")
+View(female_safety_1)
+
+
+
+#안전 비상벨 위치 
+read.csv(file = "C:/Users/student/Desktop/local_reposit/semi_project/data/서울특별시_용산구_안전비상벨위치_20190725.csv") -> safety_bell
+View(safety_bell)
+arrange(safety_bell,소재지지번주소) -> safety_bell 
+safety_bell_1 <- safety_bell %>% 
+  select(위도, 경도)
+View(safety_bell_1)
+
+# merge한 지도 (여기서부터는 진행중) 
+ggplot() + geom_polygon(data = yongsan_map,
+                        aes(x=long,
+                            y=lat,
+                            group=group),
+                        color="gold") +
+  geom_point(data=female_safety_1,aes(x=경도,y=위도),size=1,color="red")+
+  geom_point(data=safety_bell_1,aes(x=경도, y=위도), size=1,color="green")

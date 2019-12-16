@@ -136,7 +136,7 @@ cameras + scale_fill_gradient(low='white', high='#004ea2') +
 
 ############################################################################
 
-## 읍에 대한 좌표 지도 구하기 
+## 동에 대한 좌표 지도 구하기 
 ##읍면동 단위로 나눈 지도 데이터 가져와 
 
 
@@ -401,23 +401,99 @@ ggplot() + geom_polygon(data = songpa_map,
 
 #25. 강동구
 #shp 파일에서 강동구만 뽑아내기
-small_map$id <- as.numeric(small_map$id)
 gangdong_map <- small_map[(11740100 < small_map$id) & (small_map$id <= 11740110),]
-View(gangdong_map) 
-View(small_map)
-str(gangdong_map)
-gangdong_merge <- merge(gangdong_map, df, by="id")
-View(yongsan_merge)
-#####일단 여기까지 
+ggplot() + geom_polygon(data = gangdong_map,
+                        aes(x=long,
+                            y=lat,
+                            group=group),
+                        color="black")
+######################################일단 여기까지 
+
+
+##. 용산구에 치안유지장치 찍어보기 
+#shp 파일에서 용산구만 뽑아내기
+yongsan_map <- small_map[(11170100 < small_map$id) & (small_map$id <= 11170136),]
+
+#일단 merge안한 지도부터 
+ggplot() + geom_polygon(data = yongsan_map,
+                        aes(x=long,
+                            y=lat,
+                            group=group),
+                        color="gold")
+
+
+#여성 안전지킴이집 좌표 
+read.csv(file = "C:/Users/student/Desktop/local_reposit/semi_project/data/서울특별시_용산구_여성안심지킴이집_20190731.csv") -> female_safety
+arrange(female_safety,관할경찰서명)-> female_safety
+View(female_safety)
+table(female_safety$관할경찰서명)
+
+female_safety_1 <- female_safety %>%
+  select("위도","경도","소재지지번주소","관할경찰서명")
+View(female_safety_1)
+
+
+#CCTV 위치(*원본이 위도 경도만 추려짐)
+read.csv(file="C:/Users/student/Desktop/local_reposit/semi_project/data/서울특별시_용산구_CCTV위치.csv") -> yongsan_cctv
+View(yongsan_cctv)
+
+
+#안전 비상벨 위치 
+read.csv(file = "C:/Users/student/Desktop/local_reposit/semi_project/data/서울특별시_용산구_안전비상벨위치_20190725.csv") -> safety_bell
+View(safety_bell)
+arrange(safety_bell,소재지지번주소) -> safety_bell 
+safety_bell_1 <- safety_bell %>% 
+  select(위도, 경도)
+View(safety_bell_1)
+
+
+# 구글 맵 투명도로 덧씌우기 
+#googleAPIkey = "AIzaSyD_kdESG6jCzU3SxGl8FWIxp_MkAYeynRw"
+googleAPIkey = "AIzaSyDb8Oqv9AqTVBFWUKyOZh1SkSv_9SeEtKI"
+
+register_google(googleAPIkey)
+
+cen <- c(126.981825,37.529563)
+gg_seoul <- get_googlemap(center = cen,
+                          maptype = "satellite",
+                          zoom = 13)
+
+myMap <- ggmap(gg_seoul) +
+  geom_point(data=yongsan_cctv,aes(x=경도, y=위도), size=0.6,color="yellow") +
+  geom_point(data=female_safety_1,aes(x=경도,y=위도),size=0.6,color="red") +
+  geom_point(data=safety_bell_1,aes(x=경도, y=위도), size=0.6,color="green") +
+  geom_polygon(data = yongsan_map,
+               aes(x=long,
+                   y=lat,
+                   group=group,
+                   colour=phyla, 
+                   alpha = 0.0),
+               color="black",
+               col = adjustcolor("gray",alpha = 0.5),
+               fill=NA)
+
+ggplotly(myMap)
+
+    #help(geom_polygon)
+
 
 
 # merge한 지도 (여기서부터는 진행중) 
-yongsan_merge <- ggplot() + geom_polygon(data = yongsan_merge,
-                                         aes(x=long, 
-                                             y=lat,
-                                             group = group, 
-                                             fill =X2018),
-                                         color = "black")
+ggplot() + geom_polygon(data = yongsan_map,
+                        aes(x=long,
+                            y=lat,
+                            group=group),
+                        color="gold") +
+  ggmap(data=gg_seoul())
+  geom_point(data=female_safety_1,aes(x=경도,y=위도),size=1,color="red")+
+  geom_point(data=safety_bell_1,aes(x=경도, y=위도), size=1,color="green")
+  
 
-yongsan_merge
+
+
+
+
+
+
+
 
