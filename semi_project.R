@@ -128,7 +128,42 @@ View(gu_police)
 head(gu_crime)
 gu_police
 head(cctv_cor)
+write.csv(gu_crime, "C:/Users/student/Desktop/local_reposit/semi_project/data/gu_crime.csv")
+
+
+gu_mapid = read.csv(file.choose(), stringsAsFactors = T )
+gu_mapid = as.data.frame(gu_mapid)
+gu_mapid <- rename(gu_mapid,
+                   gu = "시군구명") 
+gu_mapid
+View(gu_crime)
+crimemap_df <- left_join(gu_mapid,gu_crime, by="gu", stringsAsFactors = T)
+class(crimemap_df)
+View(crimemap_df)
 # cctv와 범죄건수의 상관계수가 -0.5이상이며,
 # 구별 범죄건수 4위
 # ??? 10만명 당 지구대, 경찰서 수가 21위인데 어떻게 연관지을지... 
+
+########################서울시 행정구별 범죄률 지도를 작성해보자 
+map <- shapefile("C:/R_Lecture/data/SIG_201703/TL_SCCO_SIG.shp") #좌표계 설정 
+
+map <- spTransform(map,CRSobj = CRS("+proj=longlat +ellps=WGS84 +datumWGS84 +no_defs"))
+korea_map <- fortify(map,region ="SIG_CD")
+
+class(korea_map)
+View(korea_map)
+
+
+#서울시만 뽑아내기 
+korea_map$id <- as.numeric(korea_map$id)
+seoul_map <- korea_map[korea_map$id <= 11740,]
+View(seoul_map)
+map_merge <- merge(seoul_map, crimemap_df, by="id")
+View(map_merge)
+
+crime_map <- ggplot() + geom_polygon(data = map_merge,
+                                   aes(x=long, y = lat, group = group, fill=gu_crime),
+                                   color = "gold") 
+crime_map
+
 
