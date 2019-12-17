@@ -1,3 +1,4 @@
+install.packages("plotly")
 install.packages("ggmap")
 install.packages("gglplot2")
 install.packages("raster")
@@ -7,6 +8,8 @@ install.packages("rgdal")
 install.packages("tidyverse")
 install.packages("sf")
 install.packages("viridis")
+
+library(plotly)
 library(ggmap)
 library(ggplot2)
 library(raster)
@@ -17,6 +20,7 @@ library(stringr)
 library(tidyverse)
 library(sf)
 library(viridis)
+library(xlsx)
 sessionInfo()
 
 
@@ -446,6 +450,56 @@ safety_bell_1 <- safety_bell %>%
   select(위도, 경도)
 View(safety_bell_1)
 
+#경찰서, 파출소, 지구대위치(좌표로) 
+#read.xlsx2(file = "C:/Users/student/Desktop/local_reposit/semi_project/data/서울시 지구대 파출소 치안센터 정보.xlsx", sheetIndex=2) -> yongsan_patrol
+read.csv(file = "C:/Users/student/Desktop/local_reposit/semi_project/data/서울시_지구대_파출소_치안센터_정보.csv", sep = " ") -> yongsan_patrol
+
+View(yongsan_patrol)
+yongsan_patrol1 <- yongsan_patrol %>%
+  select(위도, 경도)
+View(yongsan_patrol1)
+yongsan_patrol1 <- as.data.frame(yongsan_patrol1, stringAsFactor = F)
+
+
+
+
+#용산구내 경찰서 좌표(안심벨 관할 포함) 
+female_safety_1 <- female_safety_1 %>%
+  mutate(id = ifelse(관할경찰서명 == "보광파출소", "1",
+                           ifelse(관할경찰서명 == "용산역파출소","2",
+                                        ifelse(관할경찰서명 == "용중지구대","3",
+                                                     ifelse(관할경찰서명 == "원효지구대","4",
+                                                                  ifelse(관할경찰서명 == "이촌파출소","5",
+                                                                               ifelse(관할경찰서명 == "이태원파출소","6",
+                                                                                            ifelse(관할경찰서명 == "한강로파출소","7","8"))))))))
+View(female_safety_1)
+
+
+
+# 용산구 경찰서 좌표
+geo_code = geocode(enc2utf8("보광파출소"))
+geo_code1 = geocode(enc2utf8("용산역파출소"))
+geo_code2 = geocode(enc2utf8("용중지구대"))
+geo_code3 = geocode(enc2utf8("원효지구대"))
+geo_code4 = geocode(enc2utf8("이촌파출소"))
+geo_code5 = geocode(enc2utf8("이태원파출소"))
+geo_code6 = geocode(enc2utf8("한강로파출소"))
+geo_code7 = geocode(enc2utf8("한남파출소"))
+
+police_loc = rbind(geo_code,
+                   geo_code1,
+                   geo_code2,
+                   geo_code3,
+                   geo_code4,
+                   geo_code5,
+                   geo_code6,
+                   geo_code7)
+police_loc <- as.data.frame(police_loc)
+police_loc <- rename(police_loc,"위도"="lat","경도"="lon") 
+
+
+
+
 
 # 구글 맵 투명도로 덧씌우기 
 #googleAPIkey = "AIzaSyD_kdESG6jCzU3SxGl8FWIxp_MkAYeynRw"
@@ -455,13 +509,17 @@ register_google(googleAPIkey)
 
 cen <- c(126.981825,37.529563)
 gg_seoul <- get_googlemap(center = cen,
-                          maptype = "satellite",
+                          maptype = "roadmap",
                           zoom = 13)
 
-myMap <- ggmap(gg_seoul) +
-  geom_point(data=yongsan_cctv,aes(x=경도, y=위도), size=0.6,color="yellow") +
+
+
+myMap <- ggmap(gg_seoul) + stat_density_2d(data=female_safety_1, aes(x=경도, y=위도)) +
+  #geom_point(data=yongsan_cctv,aes(x=경도, y=위도), size=0.6,color="yellow") +
   geom_point(data=female_safety_1,aes(x=경도,y=위도),size=0.6,color="red") +
   geom_point(data=safety_bell_1,aes(x=경도, y=위도), size=0.6,color="green") +
+  #geom_point(data=yongsan_patrol1,aes(x=경도, y=위도), size=0.6,color="blue") +
+  geom_point(data=police_loc,aes(x=경도,y=위도),size=1,color="blue")+
   geom_polygon(data = yongsan_map,
                aes(x=long,
                    y=lat,
@@ -471,6 +529,15 @@ myMap <- ggmap(gg_seoul) +
                color="black",
                col = adjustcolor("gray",alpha = 0.5),
                fill=NA)
+
+
+#geom_polygon(data = yongsan_map,
+#             aes(x=long,
+#                 y=lat,
+#                 group=group),
+#             fill = NA,
+#             color= "black",
+#             size = 0.5) +
 
 ggplotly(myMap)
 
