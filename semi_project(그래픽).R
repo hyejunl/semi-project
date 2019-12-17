@@ -8,6 +8,7 @@ install.packages("rgdal")
 install.packages("tidyverse")
 install.packages("sf")
 install.packages("viridis")
+install.packages("readxl")
 
 library(plotly)
 library(ggmap)
@@ -21,6 +22,7 @@ library(tidyverse)
 library(sf)
 library(viridis)
 library(xlsx)
+library(readxl)
 sessionInfo()
 
 
@@ -59,8 +61,7 @@ cameras
 
 #########################################################################
 
-install.packages("readxl")
-library(readxl)
+
 
 raw <- "C:/R_Lecture/data/Seoul_Police_Stations(2018).xls"
 
