@@ -546,18 +546,6 @@ ggplotly(myMap)
 
 
 
-# merge한 지도 (여기서부터는 진행중) 
-ggplot() + geom_polygon(data = yongsan_map,
-                        aes(x=long,
-                            y=lat,
-                            group=group),
-                        color="gold") +
-  ggmap(data=gg_seoul())
-  geom_point(data=female_safety_1,aes(x=경도,y=위도),size=1,color="red")+
-  geom_point(data=safety_bell_1,aes(x=경도, y=위도), size=1,color="green")
-  
-
-
 
 
 

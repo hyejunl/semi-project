@@ -9,6 +9,7 @@ install.packages("tidyverse")
 install.packages("sf")
 install.packages("viridis")
 install.packages("readxl")
+install.packages("leaflet")
 
 library(plotly)
 library(ggmap)
@@ -23,6 +24,7 @@ library(sf)
 library(viridis)
 library(xlsx)
 library(readxl)
+library(leaflet)
 sessionInfo()
 
 
@@ -346,6 +348,23 @@ ggplot() + geom_polygon(data = wonhyo1_map,
                         color="gold")
 
 
+##이촌동(29)
+ichon_map <- small_map[(11170129 == small_map$id) ,]
+
+ggplot() + geom_polygon(data = ichon_map,
+                        aes(x=long,
+                            y=lat,
+                            group=group),
+                        color="gold")
+
+##용문동(도원동 추가) (21)
+yongmoon_map <- small_map[(11170121 == small_map$id) | (small_map$id == 11170120) ,]
+
+ggplot() + geom_polygon(data = yongmoon_map,
+                        aes(x=long,
+                            y=lat,
+                            group=group),
+                        color="gold")
 
 
 
@@ -375,15 +394,15 @@ View(safety_bell_1)
 
 #경찰서, 파출소, 지구대위치(좌표로) 
 #read.xlsx2(file = "C:/Users/student/Desktop/local_reposit/semi_project/data/서울시 지구대 파출소 치안센터 정보.xlsx", sheetIndex=2) -> yongsan_patrol
-read.csv(file = "C:/Users/student/Desktop/local_reposit/semi-project/data/서울시_지구대_파출소_치안센터_정보.csv", sep = " ") -> yongsan_patrol
+read.csv(file = "C:/Users/student/Desktop/local_reposit/semi-project/data/서울시 지구대 파출소 치안센터 정보_용산.csv", sep = ",") -> yongsan_patrol
 
 View(yongsan_patrol)
-yongsan_patrol1 <- yongsan_patrol %>%
-  select(위도, 경도)
-View(yongsan_patrol1)
-yongsan_patrol1 <- as.data.frame(yongsan_patrol1, stringAsFactor = F)
+class(yongsan_patrol)
+yongsan_patrol<- as.data.frame(yongsan_patrol1, stringAsFactor = F)
 
 
+
+####경찰서 찾는 다른방법 
 
 
 #용산구내 경찰서 좌표(안심벨 관할 포함) 
@@ -420,6 +439,7 @@ police_loc = rbind(geo_code,
 police_loc <- as.data.frame(police_loc)
 police_loc <- rename(police_loc,"위도"="lat","경도"="lon") 
 
+####
 
 
 
@@ -432,8 +452,8 @@ police_loc <- rename(police_loc,"위도"="lat","경도"="lon")
 
 
 
-
-# 구글 맵 투명도로 덧씌우기 
+### 구글 맵 투명도로 덧씌우기 
+##원효로 1동 
 #googleAPIkey = "AIzaSyD_kdESG6jCzU3SxGl8FWIxp_MkAYeynRw"
 googleAPIkey = "AIzaSyDb8Oqv9AqTVBFWUKyOZh1SkSv_9SeEtKI"
 
@@ -441,8 +461,8 @@ register_google(googleAPIkey)
 
 cen <- c(126.965807,37.537746)  
 gg_wonhyo1 <- get_googlemap(center = cen,
-                          maptype = "satellite",
-                          zoom = 16)
+                          maptype = "roadmap",
+                          zoom = 15)
 
 
 
@@ -450,7 +470,7 @@ myMap <- ggmap(gg_wonhyo1) +
   #geom_point(data=yongsan_cctv,aes(x=경도, y=위도), size=0.6,color="yellow") +
   geom_point(data=female_safety_1,aes(x=경도,y=위도),size=0.6,color="red") +
   geom_point(data=safety_bell_1,aes(x=경도, y=위도), size=0.6,color="green") +
-  #geom_point(data=yongsan_patrol1,aes(x=경도, y=위도), size=0.6,color="blue") +
+  geom_point(data=yongsan_patrol,aes(x=경도, y=위도), size=0.6,color="blue") +
   #geom_point(data=police_loc,aes(x=경도,y=위도),size=1,color="blue")+
   geom_polygon(data = wonhyo1_map,
                aes(x=long,
@@ -473,5 +493,79 @@ myMap <- ggmap(gg_wonhyo1) +
 
 ggplotly(myMap)
 
-#help(geom_polygon)
-  
+  ##이촌동 
+
+cen <- c(126.964558,37.517345)  
+gg_ichon <- get_googlemap(center = cen,
+                            maptype = "roadmap",
+                            zoom = 14)
+
+myMap2 <- ggmap(gg_ichon) + 
+  #geom_point(data=yongsan_cctv,aes(x=경도, y=위도), size=0.6,color="yellow") +
+  geom_point(data=female_safety_1,aes(x=경도,y=위도),size=0.6,color="red") +
+  geom_point(data=safety_bell_1,aes(x=경도, y=위도), size=0.6,color="green") +
+  geom_point(data=yongsan_patrol,aes(x=경도, y=위도), size=0.6,color="blue") +
+  #geom_point(data=police_loc,aes(x=경도,y=위도),size=1,color="blue")+
+  geom_polygon(data = ichon_map,
+               aes(x=long,
+                   y=lat,
+                   group=group,
+                   colour=phyla, 
+                   alpha = 0.0),
+               color="black",
+               col = adjustcolor("gray",alpha = 0.5),
+               fill=NA)
+
+ggplotly(myMap2)
+
+##용문동 
+
+cen <- c(126.959234,37.537601)  
+gg_yongmoon <- get_googlemap(center = cen,
+                          maptype = "roadmap",
+                          zoom = 16)
+
+myMap3 <- ggmap(gg_yongmoon) + 
+  #geom_point(data=yongsan_cctv,aes(x=경도, y=위도), size=0.6,color="yellow") +
+  geom_point(data=female_safety_1,aes(x=경도,y=위도),size=0.6,color="red") +
+  geom_point(data=safety_bell_1,aes(x=경도, y=위도), size=0.6,color="green") +
+  geom_point(data=yongsan_patrol,aes(x=경도, y=위도), size=0.6,color="blue") +
+  #geom_point(data=police_loc,aes(x=경도,y=위도),size=1,color="blue")+
+  geom_polygon(data = yongmoon_map,
+               aes(x=long,
+                   y=lat,
+                   group=group,
+                   colour=phyla, 
+                   alpha = 0.0),
+               color="black",
+               col = adjustcolor("gray",alpha = 0.5),
+               fill=NA)
+
+ggplotly(myMap3)
+
+
+
+
+#### 원으로 맵그리기
+#1. 원효지구대
+central_point_coordinates <- c(lng = 126.965807, lat = 37.537746)
+
+distance_max <- 5
+
+map_background <- leaflet()%>%
+  addTiles()%>%
+  setView(lng = central_point_coordinates[1],lat = central_point_coordinates[2],zoom=13)%>%
+  addCircles(lng = central_point_coordinates[1],lat = central_point_coordinates[2],radius=distance_max * 100, color = "blue")
+
+map_background
+#2. 이촌파출소 
+central_point_coordinates <- c(lng = 126.964558, lat = 37.517345)
+
+distance_max <- 5
+
+map_background <- leaflet()%>%
+  addTiles()%>%
+  setView(lng = central_point_coordinates[1],lat = central_point_coordinates[2],zoom=13)%>%
+  addCircles(lng = central_point_coordinates[1],lat = central_point_coordinates[2],radius=distance_max * 100, color = "blue")
+
+map_background
