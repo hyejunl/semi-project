@@ -14,7 +14,12 @@ install.packages("devtools")
 install.packages("plotly")
 install.packages("dygraphs")
 install.packages("leaflet")
+install.packages("tidyverse")
+install.packages("sf")
 
+
+library(rgdal)
+library(sf)
 library(readxl)
 library(xlsx)
 library(dplyr)
@@ -34,7 +39,7 @@ library(leaflet)
 
 # 구별 인구 수 -> pop
 #population_file = "C:/Users/LHJ/Desktop/안심귀가 project/구별 인구 수.xls"
-population_file = "C:/Users/student/Desktop/semi-project/data/구별 인구 수.xls"
+population_file = "C:/Users/student/Desktop/semi/semi-project/data/구별 인구 수.xls"
 raw_population <- read_excel(path = population_file)
 pop <- as.data.frame(raw_population)
 pop <- rename(pop,gu=...1)
@@ -42,7 +47,7 @@ View(pop);str(pop)
 
 # 구별 연도별 범죄 발생 건 수 ->crime
 #crime_file = "C:/Users/LHJ/Desktop/안심귀가 project/구별 연도별 범죄 발생 건수.xls"
-crime_file = "C:/Users/student/Desktop/semi-project/data/구별 연도별 범죄 발생 건수.xls"
+crime_file = "C:/Users/student/Desktop/semi/semi-project/data/구별 연도별 범죄 발생 건수.xls"
 raw_crime <- read_excel(path = crime_file)
 crime <- as.data.frame(raw_crime)
 crime <- rename(crime,
@@ -56,7 +61,7 @@ View(crime);str(crime)
 
 # 구별 경찰서 개소 수 -> police
 #police_file = "C:/Users/LHJ/Desktop/안심귀가 project/서울시 구별 경찰관서 개소 수.xls"
-police_file = "C:/Users/student/Desktop/semi-project/data/서울시 구별 경찰관서 개소 수.xls"
+police_file = "C:/Users/student/Desktop/semi/semi-project/data/서울시 구별 경찰관서 개소 수.xls"
 raw_police <- read_excel(path = police_file)
 police <- as.data.frame(raw_police)
 police <- rename(police,
@@ -67,17 +72,18 @@ View(police);str(police)
 
 # 구별 연도별 cctv 개수 -> cctv
 #cctv_file = "C:/Users/LHJ/Desktop/안심귀가 project/서울시 자치구 년도별 CCTV 설치 현황(2011년 이전_2018년).xlsx"
-cctv_file ="C:/Users/student/Desktop/semi-project/data/서울시 자치구 년도별 CCTV 설치 현황(2011년 이전_2018년).xlsx"
+cctv_file ="C:/Users/student/Desktop/semi/semi-project/data/서울시 자치구 년도별 CCTV 설치 현황(2011년 이전_2018년).xlsx"
 raw_cctv <- read_excel(path = cctv_file)
 cctv <- as.data.frame(raw_cctv)
+
 cctv <- rename(cctv,
-                gu=...1,
                 cam_14=`2014`,
                 cam_15=`2015`,
                 cam_16=`2016`,
                 cam_17=`2017`,
-                cam_18=`2018`)%>%
-  select("gu","cam_14","cam_15","cam_16","cam_17","cam_18")
+                cam_18=`2018`)
+
+cctv <- cctv %>% select(gu,cam_14,cam_15,cam_16,cam_17,cam_18)
 View(cctv);str(cctv)
 
 
@@ -85,9 +91,10 @@ View(cctv);str(cctv)
 #######################1. 10만명 당 범죄 건수가 많은 구(pop,crime 사용)->gu_crime
 gu_crime <- left_join(pop,crime)%>%
   select("gu","population","c_18")%>%
-  mutate(gu_crime=c_18/(population/100000))%>%
-  arrange(desc(gu_crime))
+  mutate(crime=c_18/(population/100000))%>%
+  arrange(desc(crime))
 str(gu_crime);View(gu_crime)
+
 
 
 #######################2. CCTV로도 범죄가 줄어들지 않는 구(crime,cctv사용)->cctv_cor
@@ -123,21 +130,14 @@ gu_police <- left_join(pop,police)%>%
 View(gu_police)
 
 ###########################################gu_crime 시각화
-???
+gu_crime
 
 
-####################### 어떤 지역 선택??
-head(gu_crime)
-gu_police
-head(cctv_cor)
-# cctv와 범죄건수의 상관계수가 -0.5이상이며,
-# 구별 범죄건수 4위
-# ??? 10만명 당 지구대, 경찰서 수가 21위인데 어떻게 연관지을지... 
 
 
 ########################## 안심벨 동별 개수
 #안전 비상벨 위치 
-safety_bell <-read.csv(file = "C:/Users/student/Desktop/semi-project/data/서울특별시_용산구_안전비상벨위치_20190725.csv")
+safety_bell <-read.csv(file = "C:/Users/student/Desktop/semi/semi-project/data/서울특별시_용산구_안전비상벨위치_20190725.csv")
 View(safety_bell)
 safety_bell_r <- select(safety_bell,"소재지지번주소")
 
@@ -152,7 +152,7 @@ dong_df <-dong_df%>%
 dong_df <-subset(dong_df,str_length(dong_v)<7)
 
 ########## 안전지킴이집 동별 개수
-female_safety <-read.csv(file = "C:/Users/student/Desktop/semi-project/data/서울특별시_용산구_여성안심지킴이집_20190731.csv") 
+female_safety <-read.csv(file = "C:/Users/student/Desktop/semi/semi-project/data/서울특별시_용산구_여성안심지킴이집_20190731.csv") 
 View(female_safety)
 female_safety_r <- select(female_safety,"소재지지번주소")
 fdong_v = c()
@@ -186,7 +186,7 @@ bell_dong_df<-dong_df%>%
   summarise(n=sum(Freq))
 
 ############### 용산구 동별 인구수
-yongpop_file ="C:/Users/student/Desktop/semi-project/data/용산구 동별 인구현황(2019.11월말).xlsx"
+yongpop_file ="C:/Users/student/Desktop/semi/semi-project/data/용산구 동별 인구현황(2019.11월말).xlsx"
 raw_yongpop <- read_excel(path = yongpop_file)
 youngpop <- as.data.frame(raw_yongpop)
 
@@ -203,12 +203,13 @@ left_join(youngpop,bell_dong_df)%>%
   arrange(bell_pop)
 
 #### 원효로1동 길뽑기
-movepop_raw <-read.csv(file = "C:/Users/student/Desktop/semi-project/data/서울시_추정유동인구.csv") 
+movepop_raw <-read.csv(file = "C:/Users/student/Desktop/semi/semi-project/data/서울시_추정유동인구.csv") 
 View(movepop)
 
 
 movepop<- movepop_raw%>%
   select("기준_년_코드","상권_코드_명","시간대_1_유동인구_수","시간대_6_유동인구_수","월요일_유동인구_수","화요일_유동인구_수","수요일_유동인구_수","목요일_유동인구_수","금요일_유동인구_수","토요일_유동인구_수","일요일_유동인구_수")
+
 '''
 df1<-movepop%>%
   filter(상권_코드_명 == "효창원로42길")
@@ -328,18 +329,18 @@ View(df_result)
 
 
 #### 용산구 치안센터
-yongp_file = "C:/Users/student/Desktop/semi-project/data/서울시 지구대 파출소 치안센터 정보.xlsx"
+yongp_file = "C:/Users/student/Desktop/semi/semi-project/data/서울시 지구대 파출소 치안센터 정보.xlsx"
 raw_yongp <- read_excel(path = yongp_file)
 yongp <- as.data.frame(raw_yongp)
 yongp<- yongp%>% 
   select("최하위기관명","행정 동","위도","경도")%>%
-  filter(최하위기관명 != "서울용산경찰서")
+  filter(최하위기관명 == "서울용산경찰서")
 yongp
 
 
 
 #### 여성 안전지킴이집 좌표 
-read.csv(file = "C:/Users/student/Desktop/semi-project/data/서울특별시_용산구_여성안심지킴이집_20190731.csv") -> female_safety
+read.csv(file = "C:/Users/student/Desktop/semi/semi-project/data/서울특별시_용산구_여성안심지킴이집_20190731.csv") -> female_safety
 arrange(female_safety,관할경찰서명)-> female_safety
 View(female_safety)
 table(female_safety$관할경찰서명)
@@ -419,9 +420,4 @@ map_background <- leaflet()%>%
   
   
 
-
-
-
-
-  
 map_background
