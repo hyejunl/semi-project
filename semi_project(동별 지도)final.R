@@ -312,7 +312,7 @@ ggplot() + geom_polygon(data = yongsan_map,
                             y=lat,
                             group=group),
                         color="gold") +
-  geom_point(data=female_safety_1,aes(x=경도,y=위도),size=1,color="red")+
+  #geom_point(data=female_safety_1,aes(x=경도,y=위도),size=1,color="red")+
   geom_point(data=safety_bell_1,aes(x=경도, y=위도), size=1,color="green")
 
 
@@ -368,6 +368,12 @@ ggplot() + geom_polygon(data = yongmoon_map,
 
 
 
+##추가로 찍을 내용들 
+#CCTV 위치(*원본이 위도 경도만 추려짐)
+read.csv(file="C:/Users/student/Desktop/local_reposit/semi-project/data/서울특별시_용산구_CCTV위치.csv") -> yongsan_cctv
+View(yongsan_cctv)
+
+
 #여성 안전지킴이집 좌표 
 read.csv(file = "C:/Users/student/Desktop/local_reposit/semi-project/data/서울특별시_용산구_여성안심지킴이집_20190731.csv") -> female_safety
 arrange(female_safety,관할경찰서명)-> female_safety
@@ -377,11 +383,6 @@ table(female_safety$관할경찰서명)
 female_safety_1 <- female_safety %>%
   select("위도","경도","소재지지번주소","관할경찰서명")
 View(female_safety_1)
-
-
-#CCTV 위치(*원본이 위도 경도만 추려짐)
-read.csv(file="C:/Users/student/Desktop/local_reposit/semi-project/data/서울특별시_용산구_CCTV위치.csv") -> yongsan_cctv
-View(yongsan_cctv)
 
 
 #안전 비상벨 위치 
@@ -398,7 +399,7 @@ read.csv(file = "C:/Users/student/Desktop/local_reposit/semi-project/data/서울
 
 View(yongsan_patrol)
 class(yongsan_patrol)
-yongsan_patrol<- as.data.frame(yongsan_patrol1, stringAsFactor = F)
+yongsan_patrol<- as.data.frame(yongsan_patrol, stringAsFactor = F)
 
 
 
@@ -439,20 +440,40 @@ police_loc = rbind(geo_code,
 police_loc <- as.data.frame(police_loc)
 police_loc <- rename(police_loc,"위도"="lat","경도"="lon") 
 
-####
+############################################################
 
 
+#### 구글 맵 투명도로 덧씌우기 
+googleAPIkey = "AIzaSyDb8Oqv9AqTVBFWUKyOZh1SkSv_9SeEtKI"
+
+register_google(googleAPIkey)
+
+cen <- c(126.981825,37.529563)
+gg_seoul <- get_googlemap(center = cen,
+                          maptype = "roadmap",
+                          zoom = 13)
 
 
+myMap <- ggmap(gg_seoul) + 
+  #stat_density_2d(data=female_safety_1, aes(x=경도, y=위도)) +
+  #geom_point(data=yongsan_cctv,aes(x=경도, y=위도), size=0.6,color="yellow") +
+  #geom_point(data=female_safety_1,aes(x=경도,y=위도),size=0.6,color="red") +
+  geom_point(data=safety_bell_1,aes(x=경도, y=위도), size=0.6,color="green") +
+  #geom_point(data=yongsan_patrol,aes(x=경도, y=위도), size=0.6,color="blue") +
+  #geom_point(data=police_loc,aes(x=경도,y=위도),size=1,color="blue")+
+  geom_polygon(data = yongsan_map,
+               aes(x=long,
+                   y=lat,
+                   group=group,
+                   colour=phyla, 
+                   alpha = 0.0),
+               color="black",
+               col = adjustcolor("gray",alpha = 0.5),
+               fill=NA)
 
 
+ggplotly(myMap)
 
-
-
-
-
-
-### 구글 맵 투명도로 덧씌우기 
 ##원효로 1동 
 #googleAPIkey = "AIzaSyD_kdESG6jCzU3SxGl8FWIxp_MkAYeynRw"
 googleAPIkey = "AIzaSyDb8Oqv9AqTVBFWUKyOZh1SkSv_9SeEtKI"
